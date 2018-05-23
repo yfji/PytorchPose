@@ -1,5 +1,4 @@
 import mobilenet as model
-import fpn_res18 as fpn
 import torch
 import cv2
 import argparse
