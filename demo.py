@@ -211,7 +211,7 @@ def main(parser):
         net.load_weights(model_path=model_path)
     elif net_type=='mobilenet':
         net=model.Mobilenet(pretrain=True)
-        model_path='models/model_iter_100000.pkl'
+        model_path='models/model_iter_220000.pkl'
         net.load_weights(model_path=model_path)
     else:
         raise Exception('Unknown network architecture')
@@ -245,7 +245,7 @@ def main(parser):
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--net', dest='name', type=str, default='res18',help='mobilenet or resnet18')
+    parser.add_argument('--net', dest='name', type=str, default='mobilenet',help='mobilenet or resnet18')
     parser.add_argument('--thresh', dest='threshold', type=float,default=0.2, help='threshold for heatmap')
     parser.add_argument('--image', dest='filename', type=str, default='', help='image file path')
     parser.add_argument('--imagedir', dest='imagedir', type=str, default='', help='directory containing images')

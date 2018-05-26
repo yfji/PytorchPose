@@ -8,7 +8,7 @@ def putGaussianMap(label, keypoints, stride=8, sigma=7.0):
     start = stride / 2.0 - 0.5
     for i in range(label.shape[2]-1):    #[h,w,c]
         kp=keypoints[i]
-        if kp[-1]<=2:
+        if kp[-1]<=2 and (kp[0]>0.1 or kp[1]>0.1):
             for y in range(label.shape[0]):
                 for x in range(label.shape[1]):
                     yy = start + y * stride
@@ -44,6 +44,11 @@ def putVecMap(label, from_pt, to_pt, count, grid_x, grid_y, stride=8, sigma=7.0,
     grid_to=1.0*to_pt/stride
     vec=grid_to-grid_from
     vec_l1=np.sqrt(vec[0]**2+vec[1]**2)
+    
+    if vec_l1==0:
+        print('Warning: vector length is zero')
+        return
+    
     vec/=vec_l1
     
     min_x = max(int(round(min(grid_from[0], grid_to[0])-thre)), 0)

@@ -30,7 +30,7 @@ class DataLoader(data.Dataset):
         self.sigma=5.0
         self.vec_thres=0.8
         
-        self.visualize=False
+        self.visualize=True
         self.savedir='./visualize'
         self.image_index=0
         self.net_input_size=256
@@ -126,9 +126,9 @@ class DataLoader(data.Dataset):
         for i in range(heatmap_bgr.shape[0]):
             for j in range(heatmap_bgr.shape[1]):
                 if name=='kpt':
-                    heatmap_bgr[i,j,[2,1,0]]=self.getJetColor(1-g_map[i,j],0,1)
+                    heatmap_bgr[i,j]=self.getJetColor(g_map[i,j],0,1)
                 elif name=='paf':
-                    heatmap_bgr[i,j,[2,1,0]]=self.getJetColor(paf_map[i,j],0,1)
+                    heatmap_bgr[i,j]=self.getJetColor(paf_map[i,j],0,1)
         out_image=cv2.addWeighted(image, 0.7, heatmap_bgr, 0.3, 0).astype(np.uint8)
         return out_image
     

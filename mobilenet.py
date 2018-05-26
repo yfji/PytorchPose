@@ -153,8 +153,12 @@ class Mobilenet(nn.Module):
             from collections import OrderedDict
             tmp = OrderedDict()
             for k,v in pretrained_dict.items():
+#                print(k,v.shape)
                 if k in model_dict:
                     tmp[k] = v
+                elif 'module' in k: #multi_gpu
+                    t_k=k[k.find('.')+1:]
+                    tmp[t_k] = v
             model_dict.update(tmp)
             self.load_state_dict(model_dict)
         except:

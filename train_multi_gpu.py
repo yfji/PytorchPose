@@ -8,6 +8,9 @@ import torchvision.transforms as transforms
 import os
 import numpy as np
 
+#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+gpu_ids=[0,1]
+
 def parse():
     parser = argparse.ArgumentParser()
     return parser.parse_args()
@@ -15,18 +18,20 @@ def parse():
 def construct_model():
     net = mobilenet.Mobilenet()
     #net.load_weights(model_path='models/model_iter_80000.pkl')
-    net.cuda()
+    net.cuda(gpu_ids[0])
+    net = nn.DataParallel(net, device_ids=gpu_ids)
     return net
 
 def main():
     anno_path='/mnt/sda6/Keypoint/ai_challenger_keypoint_train_20170909/keypoint_train_annotations_20170909.json'
     img_dir='/mnt/sda6/Keypoint/ai_challenger_keypoint_train_20170909/keypoint_train_images_20170902/'
     
-    batch=12
-    base_lr=0.000032
+    batch=10
+    base_lr=0.00004
     decay_ratio=0.125
-    max_iters=220000
-    stepvalues=[120000, 180000, 220000]
+    max_iters=440000
+    stepvalues=[140000, 360000, 440000]
+    #stepvalues=[200,400,440000]
     g_steps=stepvalues[0]
     
     display=20
@@ -75,22 +80,22 @@ def main():
             loss_L2=criterion_L2(pafs, label_var[:,d_loader.num_parts+1:])*heat_weight
 
             loss=loss_L1+loss_L2
-#            hm_np=heatmap.data.cpu().numpy()
-#            label_np=label.numpy()
-#            loss_np=np.sum((hm_np-label_np)**2,axis=(0,1,2,3))/batch
-
+            
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
    
             rate=lr*np.power(decay_ratio, 1.0*step/g_steps)
-            for param_group in optimizer.param_groups:
-                param_group['lr']=rate
+#            for param_group in optimizer.param_groups:
+#                param_group['lr']=rate
 
             if iters%display==0:
-                print('[%d/%d] learn rate: %e\nloss: %f\nloss_L1: %f\nloss_L2: %f'%(iters, max_iters, rate, loss, loss_L1, loss_L2))
+                print('[%d/%d] learn rate: %e\nloss: %f\nloss_L1: %f\nloss_L2: %f'%(iters, max_iters, lr, loss, loss_L1, loss_L2))
+                
             if iters==stepvalues[step_index]:
                 print('learning rate decay: %e'%rate)
+                for param_group in optimizer.param_groups:
+                    param_group['lr']=rate
                 step=0
                 lr=rate
                 g_steps=stepvalues[step_index+1]-stepvalues[step_index]
@@ -109,6 +114,5 @@ def main():
     log_file.close()
 
 if __name__=='__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     main()
     
